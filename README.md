@@ -28,7 +28,7 @@ The Ansible Loki Role allows you to effortlessly deploy and manage [Loki](https:
 ## Requirements
 
 - Ansible 2.9+
-- `RHEL`/`RockyLinux`/`AlmaLinux` 8+ or compatible distributions
+- `RHEL`/`RockyLinux`/`AlmaLinux` 8+ or compatible distribution. `Debian`/`Ubuntu` or compatible distribution
 
 ## Role Variables
 
