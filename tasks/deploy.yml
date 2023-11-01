@@ -32,18 +32,24 @@
       register: __current_deployed_version
       when: __already_deployed.stat.exists | bool
 
-- name: Install Loki from remote URL
+- name: RPM-Based Install Loki from remote URL
   ansible.builtin.dnf:
-    name: "{{ loki_download_url }}"
+    name: "{{ loki_download_rpm }}"
     state: present
     disable_gpg_check: true
   notify: restart loki
-  when: __current_deployed_version.stdout is not defined or loki_version not in __current_deployed_version.stdout
+  when: (__current_deployed_version.stdout is not defined or loki_version not in __current_deployed_version.stdout) and ansible_os_family == 'RedHat'
 
 - name: Check if Loki default dir is present
   ansible.builtin.stat:
     path: "/tmp/loki/boltdb-shipper-active"
   register: __default_structure
+
+- name: DEB-Based Install Loki from remote URL
+  ansible.builtin.apt:
+    deb: "{{ loki_download_deb }}"
+  notify: restart loki
+  when: (__current_deployed_version.stdout is not defined or loki_version not in __current_deployed_version.stdout) and ansible_os_family == 'Debian'
 
 - name: Default structure cleanup
   block:
@@ -63,7 +69,6 @@
     path: "{{ loki_working_path }}"
     state: directory
     owner: "loki"
-    group: "loki"
     mode: "0755"
 
 - name: Template Loki config - /etc/loki/config.yml
@@ -81,7 +86,6 @@
     path: "{{ loki_ruler_alert_path }}"
     state: directory
     owner: "loki"
-    group: "loki"
     mode: "0750"
   when:
     - loki_ruler_alert_path is defined
@@ -92,7 +96,6 @@
     src: "rules.yml.j2"
     dest: "{{ loki_ruler_alert_path }}/rules.yml"
     owner: "loki"
-    group: "loki"
     mode: "0644"
   notify: restart loki
   when:
@@ -106,7 +109,7 @@
     permanent: true
     port: "{{ loki_http_listen_port }}/tcp"
     state: enabled
-  when: loki_expose_port | bool
+  when: (loki_expose_port | bool) and ansible_os_family == 'RedHat'
 
 - name: Ensure that Loki {{ loki_http_listen_port }}/tcp port - firewalld rule is not present
   ansible.posix.firewalld:
@@ -114,7 +117,7 @@
     permanent: true
     port: "{{ loki_http_listen_port }}/tcp"
     state: disabled
-  when: not loki_expose_port | bool
+  when: (loki_expose_port | bool) and ansible_os_family == 'RedHat'
 
 - name: Flush handlers after deployment
   ansible.builtin.meta: flush_handlers

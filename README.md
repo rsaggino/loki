@@ -45,7 +45,8 @@ The version of Loki to download and deploy. Supported standard version "2.8.2" f
 
 
 ```yaml
-loki_arch: "x86_64"
+loki_arch_redhat: "x86_64"
+loki_arch_debian: "amd64"
 ```
 The architecture for `RPM` package for which Loki is being deployed. Possible values `x86_64`, `aarch64`, `arm`.
 
@@ -66,7 +67,9 @@ loki_expose_port: true
 Set to `true` by default, controls whether to add a firewalld rule for exposing the Loki port. When `true`, a firewalld rule is added to allow inbound traffic on the specified Loki port. Set to `false` to ensure that firewalld rule is not present.
 
 ```yaml
-loki_download_url: "https://github.com/grafana/loki/releases/download/v{{ loki_version }}/loki-{{ loki_version }}.{{ loki_arch }}.rpm"
+loki_download_rpm: "https://github.com/grafana/loki/releases/download/v{{ loki_version }}/loki-{{ loki_version }}.{{ loki_arch_redhat }}.rpm"
+loki_download_deb: "https://github.com/grafana/loki/releases/download/v{{ loki_version }}/loki_{{ loki_version }}_{{ loki_arch_debian }}.deb"
+
 ```
 The default download URL for the Loki rpm package from GitHub.
 
